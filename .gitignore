@@ -1,3 +1,7 @@
+node_modules
+scenes
+./build.js
+
 # Logs
 logs
 *.log

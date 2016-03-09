@@ -1,0 +1,28 @@
+/* Initial Strucutre */
+.Slide {
+  display: none;
+}
+
+.Slide-center {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.table {
+  display: table;
+  width: 100vw;
+  height: 100vh;
+}
+.table-center {
+  display: table-cell;
+  /*text-align: center;*/
+  vertical-align: middle;
+  padding: 2vmin;
+}
+
+.wrapper {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
