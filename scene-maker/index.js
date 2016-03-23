@@ -1,17 +1,17 @@
 'use strict';
 
-const obscene = require('./ob-scene.js');
-const controls = require('./user/controls.js');
-const render = require('./render/index.js');
+import * as obscene from './ob-scene.js';
+import * as controls from './user/controls.js';
+import * as render from './render/index.js';
 
-const sceneUtils = require('./utils/scene-utils.js');
-const audioplayer = require('./render/audioplayer.js');
+import * as sceneUtils from './utils/scene-utils.js';
+import * as audioplayer from './render/audioplayer.js';
 
 const sceneHtmlString = sceneUtils.renderHTML();
 const sceneMotionMap = sceneUtils.getScenes();
 let sceneAudioConfig =  sceneUtils.getAudioConfig();
 
-audioplayer.config(sceneAudioConfig);
+// audioplayer.config(sceneAudioConfig);
 
 $(function() {
   init();

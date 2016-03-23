@@ -16,10 +16,12 @@
 
 .center-marker {
   position: fixed;
-  width: 2vmin;
-  height: 1vmin;
+  width: 0.5vw;
+  height: 0.5vw;
   background: rgba(255,255,255,0.8);
-  z-index: 6
+  z-index: 6;
+  right: 1vw;
+  border-radius: 3vw;
 }
 
 
@@ -33,12 +35,15 @@
   z-index: 5;
 }
 #experience-progress .progress {
-  background: rgba(255,0,0,1);
+  background: rgb(255, 255, 255);
   opacity: 0.7;
-  width: 1vmin;
+  width: 0.2vw;
   height: 100vh;
   margin-top: -100vh;
+  right: 1.15vw;
   transition: transform 0.3s ease;
+  position: absolute;
+  border-radius: 5vw;
 }
 
 ::-webkit-scrollbar {

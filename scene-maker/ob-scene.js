@@ -2,12 +2,8 @@
  *  Dependencies
 */
 
-  const Kefir = require('kefir')
-
-  const audioplayer = require('./render/audioplayer.js')
-  const videoPlayer = require('./render/videoplayer.js')
-
-  const pageUtils = require('./utils/page-utils.js')
+  import * as Kefir from 'kefir'
+  import { buildPage, convertAllPropsToPx } from './utils/page-utils.js'
 
 /*
  *  Globals
@@ -15,7 +11,7 @@
 
   const CONSTANTS = require('./constants.js')
 
-  const PROPERTIES = CONSTANTS.PROPERTIES
+  // const PROPERTIES = CONSTANTS.PROPERTIES
   const ANIMATION_TIME = CONSTANTS.ANIMATION_TIME
 
   const $window = CONSTANTS.WINDOW
@@ -27,161 +23,173 @@
  *  Initialize
 */
 
-  const stateInitialized = new Kefir.pool()
+  const stateInitialized$ = Kefir.pool()
 
   const initState = Kefir.stream(emitter => {
     emitter.emit(INIT_STATE)
   })
 
-  module.exports.init = (keyframes) => {
-
-    const keyFramesRetreived = Kefir.stream(emitter => {
-      emitter.emit(keyframes)
+  module.exports.init = (retreivedKeyFrames) => {
+    const keyFramesRetreived$ = Kefir.stream(emitter => {
+      emitter.emit(retreivedKeyFrames)
     })
 
-    const keyFramesMappedToState = keyFramesRetreived
-      .flatMap(keyframes => {
-        return initState.map(state => {
-          state.keyframes = keyframes
-          return state
-        })
-      })
+    const keyFramesMappedToState$ = keyFramesRetreived$
+      .flatMap(keyframes => initState.map(state => {
+        const s = state
+        s.keyframes = keyframes
+        return s
+      }))
       .map(state => {
-        state.currentWrapper = state.wrappers[0]
-        state.scrollTop = 0
-        return state
+        const s = state
+        s.currentWrapper = s.wrappers[0]
+        s.scrollTop = 0
+        return s
       })
 
-    stateInitialized.plug(keyFramesMappedToState)
-
+    stateInitialized$.plug(keyFramesMappedToState$)
   }
 
 /*
  *  Build Page
 */
 
-  const windowResized = stateInitialized
-    .flatMap((s) => {
-      return Kefir.fromEvents($window, 'resize', () => {return s} )
-    })
+  const windowResized$ = stateInitialized$
+    .flatMap((state) => Kefir.fromEvents($window, 'resize', () => state))
     .throttle(ANIMATION_TIME)
 
-  const dimensionsCalculated = Kefir.merge([stateInitialized, windowResized])
+  const dimensionsCalculated$ = Kefir.merge([stateInitialized$, windowResized$])
     .map(calculateDimensions)
     .map(convertKeyFrames)
     .map(calculateKeyFramesAndFocus)
     .map(setInitWrapper)
 
-      function calculateDimensions(state) {
-        state.scrollTop = Math.floor($window.scrollTop())
-        state.windowHeight = $window.height()
-        state.windowWidth = $window.width()
-        return state
-      }
+  function calculateDimensions(state) {
+    const s = state
+    s.scrollTop = Math.floor($window.scrollTop())
+    s.windowHeight = $window.height()
+    s.windowWidth = $window.width()
+    return s
+  }
 
-      function convertKeyFrames(state) {
-        state.keyframes = pageUtils.convertAllPropsToPx(state.keyframes, state.windowWidth, state.windowHeight)
-        return state
-      }
+  function convertKeyFrames(state) {
+    const s = state
+    s.keyframes = convertAllPropsToPx(s.keyframes, s.windowWidth, s.windowHeight)
+    return s
+  }
 
-      function calculateKeyFramesAndFocus(state) {
-        let pageInfo = pageUtils.buildPage(state.keyframes, state.wrappers)
+  function calculateKeyFramesAndFocus(state) {
+    const s = state
+    const pageInfo = buildPage(state.keyframes, state.wrappers)
 
-        state.bodyHeight = pageInfo.bodyHeight
-        state.wrappers = pageInfo.wrappers
+    s.bodyHeight = pageInfo.bodyHeight
+    s.wrappers = pageInfo.wrappers
 
-        state.frameFocus = pageInfo.frameFocus
-          .map(i => Math.floor(i))
-          .reduce((a, b) => { // clears any frame duplicates. TODO: find bug that makes frame duplicates
-            if (a.indexOf(b) < 0) a.push(b)
-            return a
-          }, [])
+    s.frameFocus = pageInfo.frameFocus
+      .map(i => Math.floor(i))
+      .reduce((a, b) => {
+         // clears any frame duplicates. TODO: find bug that makes frame duplicates
+        if (a.indexOf(b) < 0) a.push(b)
+        return a
+      }, [])
 
-        return state
-      }
+    return state
+  }
 
-      function setInitWrapper(state) {
-        state.currentWrapper = state.wrappers[0]
-        return state
-      }
+  function setInitWrapper(state) {
+    const s = state
+    s.currentWrapper = s.wrappers[0]
+    return s
+  }
 
-  module.exports.dimensionsCalculated = dimensionsCalculated
+  module.exports.dimensionsCalculated$ = dimensionsCalculated$
 
 /*
  *  Position moved
 */
 
-  const windowScrolled = Kefir.fromEvents($window, 'scroll')
+  const windowScrolled$ = Kefir.fromEvents($window, 'scroll')
     .throttle(ANIMATION_TIME)
 
-  const somethingMoved = Kefir.fromEvents(window, 'POSITION_CHANGED')
+  const somethingMoved$ = Kefir.fromEvents(window, 'POSITION_CHANGED')
 
-  const eventsHappened = dimensionsCalculated
-    .flatMap(state => {
-      return Kefir.merge([windowScrolled, somethingMoved])
-              .map(e => {
-                state.changed = e
-                return state
-              })
-    })
+  const windowsOrPositionChanged$ = dimensionsCalculated$
+    .flatMap(state => Kefir.merge([windowScrolled$, somethingMoved$])
+      .map(e => {
+        const s = state
+        s.changed = e
+        return s
+      })
+    )
 
-  const positionChanged = Kefir
-    .merge([dimensionsCalculated, eventsHappened])
+  const positionChanged$ = Kefir
+    .merge([dimensionsCalculated$, windowsOrPositionChanged$])
 
 /*
  *  State Changed
 */
 
   // Calculate current state
-  const calculatedCurrentState = Kefir
-    .merge([dimensionsCalculated, positionChanged])
+  const calculatedCurrentState$ = Kefir
+    .merge([dimensionsCalculated$, positionChanged$])
     .map(setTops)
     .map(setKeyframe)
     .map(getSlideLocation)
     .map(state => {
-      state.currentWrapper = state.keyframes[state.currentKeyframe].wrapper
-      return state
+      const s = state
+      s.currentWrapper = s.keyframes[s.currentKeyframe].wrapper
+      return s
     })
 
-      function setTops(state) {
-        state.scrollTop = Math.floor($window.scrollTop())
-        state.relativeScrollTop = state.scrollTop - state.prevKeyframesDurations
-        return state
-      }
+  function setTops(state) {
+    const s = state
+    s.scrollTop = Math.floor($window.scrollTop())
+    s.relativeScrollTop = s.scrollTop - s.prevKeyframesDurations
+    return s
+  }
 
-      function setKeyframe(state) {
-        if(state.scrollTop > (state.keyframes[state.currentKeyframe].duration + state.prevKeyframesDurations)) {
-            state.prevKeyframesDurations += state.keyframes[state.currentKeyframe].duration
-            state.currentKeyframe++
-        } else if(state.scrollTop < state.prevKeyframesDurations) {
-            state.currentKeyframe--
-            state.prevKeyframesDurations -= state.keyframes[state.currentKeyframe].duration
-        }
-        return state
-      }
+  function setKeyframe(state) {
+    const s = state
+    if (s.scrollTop > (s.keyframes[s.currentKeyframe].duration + s.prevKeyframesDurations)) {
+      s.prevKeyframesDurations += s.keyframes[s.currentKeyframe].duration
+      s.currentKeyframe++
+    } else if (s.scrollTop < s.prevKeyframesDurations) {
+      s.currentKeyframe--
+      s.prevKeyframesDurations -= s.keyframes[s.currentKeyframe].duration
+    }
+    return s
+  }
 
-      function getSlideLocation(state) {
-        for (let x = 1; x <= state.frameFocus.length; x++) {
-          if (state.frameFocus[x] === state.scrollTop) {
-            state.currentFrame = [x]
-          }
-          if (state.scrollTop.between(state.frameFocus[x - 1], state.frameFocus[x])) {
-            state.currentFrame = [x - 1, x]
-          }
-        }
-        return state
-      }
+  function getSlideLocation(state) {
+    function numberIsBetween(a, b) {
+      const min = Math.min.apply(Math, [a, b])
+      const max = Math.max.apply(Math, [a, b])
+      return this > min && this < max
+    }
 
-  const wrapperChanged = calculatedCurrentState
+    const s = state
+
+    for (let x = 1; x <= s.frameFocus.length; x++) {
+      if (s.frameFocus[x] === s.scrollTop) {
+        s.currentFrame = [x]
+      }
+      if (numberIsBetween.call(s.scroll, s.frameFocus[x - 1], s.frameFocus[x])) {
+        s.currentFrame = [x - 1, x]
+      }
+    }
+    return s
+  }
+
+  const wrapperChanged$ = calculatedCurrentState$
     .map(state => state.currentWrapper)
     .diff(null, '')
     .filter(currentWrapper => currentWrapper[0] !== currentWrapper[1])
     // .delay(ANIMATION_TIME*2) // To wait for first animation frame to start before switching
 
-  module.exports.wrapperChanged = wrapperChanged;
+  module.exports.wrapperChanged$ = wrapperChanged$
 
-  const scrollTopChanged = calculatedCurrentState
-    .diff(null , { // Hack, for some reason INIT_STATE isn't coming in properly
+  const scrollTopChanged$ = calculatedCurrentState$
+    .diff(null, { // Hack, for some reason INIT_STATE isn't coming in properly
       wrappers: [],
       currentWrapper: undefined,
 
@@ -200,19 +208,19 @@
 
       bodyHeight: 0,
       windowHeight: 0,
-      windowWidth: 0
+      windowWidth: 0,
     })
 
-  module.exports.scrollTopChanged = scrollTopChanged
-  // scrollTopChanged.log()
+  module.exports.scrollTopChanged$ = scrollTopChanged$
+  // scrollTopChanged$.log()
 
 /*
  *  Actions
 */
 
-  module.exports.get = () => {
-    return state
-  }
+  // module.exports.get = () => state
+  //   return state
+  // }
 
   module.exports.action = (action) => {
     switch (action) {
@@ -227,69 +235,56 @@
     }
   }
 
-  const action_focusNext = scrollTopChanged
-    .flatMapFirst((state) => {
-      return Kefir.fromEvents($window, 'FOCUS_NEXT', () => state)
-    })
+  const actionFocusNext = scrollTopChanged$
+    .flatMapFirst((state) => Kefir.fromEvents($window, 'FOCUS_NEXT', () => state))
     .map(state => state[1])
     .map(nextFocus)
 
-  const action_focusPrevious = scrollTopChanged
-    .flatMapFirst((state) => {
-      return Kefir.fromEvents($window, 'FOCUS_PREVIOUS', () => state)
-    })
+  const actionFocusPrevious = scrollTopChanged$
+    .flatMapFirst((state) => Kefir.fromEvents($window, 'FOCUS_PREVIOUS', () => state))
     .map(state => state[1])
     .map(previousFocus)
 
-    function nextFocus(state) {
-      switch(state.currentFrame.length) {
-        case 1:
-          return state.frameFocus[state.currentFrame[0] + 1]
-        case 2:
-          return state.frameFocus[state.currentFrame[1]]
-        default:
-          return false
-      }
+  function nextFocus(state) {
+    switch (state.currentFrame.length) {
+      case 1:
+        return state.frameFocus[state.currentFrame[0] + 1]
+      case 2:
+        return state.frameFocus[state.currentFrame[1]]
+      default:
+        return false
     }
+  }
 
-    function previousFocus(state) {
-      switch(state.currentFrame.length) {
-        case 1:
-          return state.frameFocus[state.currentFrame[0] - 1]
-        case 2:
-          return state.frameFocus[state.currentFrame[0]]
-        default:
-          return false
-      }
+  function previousFocus(state) {
+    switch (state.currentFrame.length) {
+      case 1:
+        return state.frameFocus[state.currentFrame[0] - 1]
+      case 2:
+        return state.frameFocus[state.currentFrame[0]]
+      default:
+        return false
     }
+  }
 
-    const focusChanged = Kefir.merge([action_focusPrevious, action_focusNext])
-      .onValue(renderScroll)
+  const focusChanged$ = Kefir.merge([actionFocusPrevious, actionFocusNext])
+    .onValue(renderScroll)
 
-    focusChanged.log();
-    function renderScroll(scroll) {
-      // console.log("RENDER", scroll, Math.floor($window.scrollTop()))
-      $bodyhtml.animate({
-        scrollTop: scroll
-      }, 1500, 'linear')
-    }
+  // TODO: Remove log
+  focusChanged$.log()
 
-    Number.prototype.between = function(a, b) {
-      var min = Math.min.apply(Math, [a, b]),
-        max = Math.max.apply(Math, [a, b])
-      return this > min && this < max
-    }
-
+  // TODO: Abstract Render to renderer
+  function renderScroll(scroll) {
+    // console.log("RENDER", scroll, Math.floor($window.scrollTop()))
+    $bodyhtml.animate({
+      scrollTop: scroll,
+    }, 1500, 'linear')
+  }
 
 /*
  *  Helpers
 */
 
-  function throwError() {
-    $bodyhtml.addClass('page-error')
-  }
-
-  function isTouchDevice() {
-    return 'ontouchstart' in window // works on most browsers
-      || 'onmsgesturechange' in window // works on ie10
-  }
+  // function throwError() {
+  //   $bodyhtml.addClass('page-error')
+  // }

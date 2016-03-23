@@ -2,24 +2,19 @@
  *  Dependencies
 */
 
-  const obscene = require('../ob-scene.js')
-  const pageUtils = require('../utils/page-utils.js')
+  import { scrollTopChanged$, dimensionsCalculated$, wrapperChanged$ } from '../ob-scene.js'
+  import * as pageUtils from '../utils/page-utils.js'
 
 /*
  *  Streams
 */
-
-  const scrollTopChanged = obscene.scrollTopChanged
-  const dimensionsCalculated = obscene.dimensionsCalculated
-  const wrapperChanged = obscene.wrapperChanged
 
 /*
  *  DOM Elements
 */
 
   const $window = $(window)
-  const $body = $('body')
-  const $bodyhtml = $('body,html')
+  const $body = $('body,html')
   const $experienceIndicator = $('#experience-progress .progress')
 
 /*
@@ -38,12 +33,12 @@
 
   // Hack to force resize once. For some
   // reason this prevents the animations from blinking on Chrome
-  scrollTopChanged.take(1).delay(500).onValue(() => {
+  scrollTopChanged$.take(1).delay(500).onValue(() => {
     $window.trigger('resize')
   })
 
   // Render Dimensions
-  dimensionsCalculated.onValue(state => {
+  dimensionsCalculated$.onValue(state => {
     $body.height(state.bodyHeight)
     renderScrollBarFocusBars(state)
   })
@@ -59,7 +54,7 @@
     }
 
   // Render Wrapper
-  wrapperChanged.onValue((currentWrapper) => {
+  wrapperChanged$.onValue((currentWrapper) => {
     // console.log("WRAPPER CHANGED");
     window.requestAnimationFrame(() => {
       $(currentWrapper[0]).hide()
@@ -107,7 +102,7 @@
 
   // Render Keyframes
 
-  scrollTopChanged.onValue((statediff) => {
+  scrollTopChanged$.onValue((statediff) => {
 
     window.requestAnimationFrame(() => {
         let prev = statediff[0]
