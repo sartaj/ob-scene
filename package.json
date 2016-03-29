@@ -6,22 +6,29 @@
   "scripts": {
     "test": "",
     "build": "webpack",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "compile": "node ./compiler.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "howler": "^1.1.29",
-    "kefir": "^3.2.0"
+    "kefir": "^3.2.0",
+    "pace": "HubSpot/pace"
+  },
+  "bin": {
+    "obscene": "./src/cli.js"
   },
   "devDependencies": {
     "babel-loader": "^6.2.2",
     "babel-preset-es2015": "^6.3.13",
+    "colors": "^1.1.2",
     "eslint": "^2.4.0",
     "eslint-config-airbnb": "^6.1.0",
     "html-loader": "latest",
     "html2hscript": "^1.2.2",
     "json-loader": "latest",
-    "on-build-webpack": "^0.1.0"
+    "on-build-webpack": "^0.1.0",
+    "watch": "^0.17.1"
   }
 }

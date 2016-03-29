@@ -8,16 +8,7 @@
 /*
  *  Globals
 */
-
-  const CONSTANTS = require('./constants.js')
-
-  // const PROPERTIES = CONSTANTS.PROPERTIES
-  const ANIMATION_TIME = CONSTANTS.ANIMATION_TIME
-
-  const $window = CONSTANTS.WINDOW
-  const $bodyhtml = CONSTANTS.BODYHTML
-
-  const INIT_STATE = CONSTANTS.INIT_STATE
+  import { ANIMATION_TIME, $window, $body, INIT_STATE } from './constants.js'
 
 /*
  *  Initialize
@@ -276,7 +267,7 @@
   // TODO: Abstract Render to renderer
   function renderScroll(scroll) {
     // console.log("RENDER", scroll, Math.floor($window.scrollTop()))
-    $bodyhtml.animate({
+    $body.animate({
       scrollTop: scroll,
     }, 1500, 'linear')
   }
@@ -286,5 +277,5 @@
 */
 
   // function throwError() {
-  //   $bodyhtml.addClass('page-error')
+  //   $body.addClass('page-error')
   // }

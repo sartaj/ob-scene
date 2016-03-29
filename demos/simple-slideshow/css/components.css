@@ -1,0 +1,59 @@
+
+
+
+.quote-read {
+  /*position: fixed;
+  top: 33%;
+  right: 10%;*/
+  color: white;
+  /*max-width: 45%;*/
+  opacity: 0;
+  font-weight: normal;
+  font-size: 4.5vmin;
+  text-align: right;
+}
+.quote-hidden {
+  opacity: 0;
+  display: block;
+}
+.quote-hidden strong, .emphasis strong {
+  color: rgba(159,201,98,1);
+  font-weight: 400;
+}
+.quote-source {
+  text-transform: uppercase;
+  font-weight: 300;
+  font-size: 3vmin;
+  display: block;
+}
+.quote-source a {
+  color: rgba(159,201,98,0.7);
+}
+
+
+.left, .right {
+  float: left;
+}
+.table {
+  position: relative;
+}
+.too-long-quote {
+  position: fixed;
+  top: 0;
+  left: 0;
+  font-size: 6.5vmin;
+  text-align: center;
+  color: rgba(255,255,255,0.3);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /*background: #333;*/
+  padding-top: 4vmax;
+  -webkit-filter: blur(2px);
+}
+.text-centered {
+  text-align: center;
+}
+.onTop {
+  z-index: 20000;
+}

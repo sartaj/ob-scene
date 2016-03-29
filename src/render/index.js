@@ -4,18 +4,7 @@
 
   import { scrollTopChanged$, dimensionsCalculated$, wrapperChanged$ } from '../ob-scene.js'
   import * as pageUtils from '../utils/page-utils.js'
-
-/*
- *  Streams
-*/
-
-/*
- *  DOM Elements
-*/
-
-  const $window = $(window)
-  const $body = $('body,html')
-  const $experienceIndicator = $('#experience-progress .progress')
+  import { $window, $body } from '../constants.js'
 
 /*
  *  Child Renders
@@ -121,7 +110,7 @@
 
     function animateScrollBar(state) {
       var percent = (state.scrollTop / state.bodyHeight).toFixed(2) * 100
-      $experienceIndicator.css({
+      $('#experience-progress .progress').css({
         'transform': 'translateY(' + percent + '%)'
       })
     }

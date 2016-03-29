@@ -1,8 +1,8 @@
 const PROPERTIES = ['translateX', 'translateY', 'opacity', 'rotate', 'scale']
 const ANIMATION_TIME = 41
 
-const $window = $(window)
-const $bodyhtml = $('body,html')
+var $window = $(window)
+var $body = $('body,html')
 
 const INIT_STATE = {
 
@@ -62,5 +62,5 @@ const INIT_STATE = {
 module.exports.INIT_STATE = INIT_STATE
 module.exports.PROPERTIES = PROPERTIES
 module.exports.ANIMATION_TIME = ANIMATION_TIME
-module.exports.WINDOW = $window
-module.exports.BODYHTML = $bodyhtml
+module.exports.$body = $body
+module.exports.$window = $window
