@@ -7,10 +7,12 @@ Create interactive infographics with parallax, autoplay, & slides capabilities. 
 
 ## Goals
 ***Design:*** Explore the design possibilities of multi-interaction interactive infographics.
+
 ***Engineering:*** Explore the capabilities of a reactive web animation engines.
 
 ## Roadmap
 ***v1.0.0***
+* Switch to virtual dom system for rendering
 * Synchronized sound support.
 * Slideshow demo.
 * Storytelling demo.
