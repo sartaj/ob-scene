@@ -12,14 +12,16 @@ Create interactive infographics with parallax, autoplay, & slides capabilities. 
 
 ## Roadmap
 ***v1.0.0***
-* Switch to virtual dom system for rendering
+* Switch to virtual dom system for rendering.
 * Synchronized sound support.
 * Slideshow demo.
 * Storytelling demo.
 * Art Demo.
 * Argument demo.
 * Add tests.
+* Add documentation.
 
 ## Backlog
 * Support for other js libraries (d3.js).
-* Create local scope capabilities (currently requires `<body>`).
+* Create local scope for dom (currently requires `<body>`).
+* Create local scope for js (`obscene` currently requires global variable `obscene_compiled`)
