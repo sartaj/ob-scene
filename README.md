@@ -1,5 +1,5 @@
 # Ob-scene
-Create interactive infographics with parallax, autoplay, & slides capabilities. Designed for reactive environments.
+Create interactive infographics with parallax, autoplay, and slide capabilities. Designed as a reactive animation engine.
 
 ## Features
 * Synchronizes scroll with time.
@@ -24,4 +24,5 @@ Create interactive infographics with parallax, autoplay, & slides capabilities. 
 ## Backlog
 * Support for other js libraries (d3.js).
 * Create local scope for dom (currently requires `<body>`).
-* Create local scope for js (`obscene` currently requires global variable `obscene_compiled`)
+* Create local scope for js (`obscene` currently requires global variable `obscene_compiled`).
+* Lazy-load buffering for scenes.
