@@ -1,7 +1,7 @@
 {
   "name": "ob-scene",
-  "version": "0.2.2",
-  "description": "A reactive animation engine. Create interactive infographics with parallax, autoplay, & slides capabilities.",
+  "version": "0.2.3",
+  "description": "A reactive animation engine. Create interactive infographics with parallax, autoplay, and slide capabilities.",
   "keywords": [
     "animation",
     "reactive",
@@ -37,9 +37,7 @@
     "colors": "^1.1.2",
     "eslint": "^2.4.0",
     "eslint-config-airbnb": "^6.1.0",
-    "html-loader": "latest",
     "html2hscript": "^1.2.2",
-    "json-loader": "latest",
     "on-build-webpack": "^0.1.0",
     "watch": "^0.17.1"
   }
