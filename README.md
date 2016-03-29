@@ -18,6 +18,7 @@ Create interactive infographics with parallax, autoplay, & slides capabilities. 
 * Storytelling demo.
 * Art Demo.
 * Argument demo.
+* Add tests.
 
 ## Backlog
 * Support for other js libraries (d3.js).

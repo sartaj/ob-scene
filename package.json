@@ -1,7 +1,12 @@
 {
   "name": "ob-scene",
-  "version": "0.2.1",
-  "description": "",
+  "version": "0.2.2",
+  "description": "A reactive animation engine. Create interactive infographics with parallax, autoplay, & slides capabilities.",
+  "keywords": [
+    "animation",
+    "reactive",
+    "observable"
+  ],
   "main": "index.js",
   "scripts": {
     "test": "",
@@ -12,15 +17,19 @@
     "minor": "npm run minify && ./node_modules/.bin/bump minor",
     "patch": "npm run minify && ./node_modules/.bin/bump patch"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Sartaj <sartaj@sartaj.me> (http://sartaj.me)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sartaj/ob-scene.git"
+  },
+  "bin": {
+    "obscene": "./compiler/cli.js"
+  },
   "dependencies": {
     "howler": "^1.1.29",
     "kefir": "^3.2.0",
     "pace": "HubSpot/pace"
-  },
-  "bin": {
-    "obscene": "./compiler/cli.js"
   },
   "devDependencies": {
     "babel-loader": "^6.2.2",
