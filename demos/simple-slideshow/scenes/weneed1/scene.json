@@ -1,0 +1,17 @@
+[
+  {
+    "wrapper": "#weneed1",
+    "duration": "33%",
+    "animations": [{
+      "selector": ".about-yourself",
+      "opacity": [0, 1]
+    }]
+  }
+  ,{
+  "wrapper": "#weneed1",
+  "duration": "33%",
+  "focus": true,
+  "animations": [{
+  }]
+}
+]

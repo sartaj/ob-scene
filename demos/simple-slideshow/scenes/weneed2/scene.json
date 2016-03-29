@@ -1,0 +1,24 @@
+[
+  {
+    "wrapper": "#weneed2",
+    "duration": "20%",
+    "animations": [{
+      "selector": ".about-yourself",
+      "opacity": [0, 1]
+    }]
+  }
+  ,{
+  "wrapper": "#weneed2",
+  "duration": "33%",
+  "focus": true,
+  "animations": [{
+  }]
+}, {
+  "wrapper": "#weneed2",
+  "duration": "33%",
+  "animations": [{
+    "selector": ".about-yourself",
+    "opacity": [2, 0]
+  }]
+}
+]

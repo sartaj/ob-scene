@@ -26,9 +26,10 @@ const processedPath = process.cwd() + '/scenes/'
 //  Compile
 
 function compile() {
-  console.log(colors.info('compiling...'))
+  console.time(colors.info('compiling...'))
   const compiled = sceneCompiler.compile(processedPath)
   fs.writeFileSync('./scenes-compiled.js', `var obscene_compiled = ${JSON.stringify(compiled)}`)
+  console.timeEnd(colors.info('compiling...'))
 }
 
 const watchOpts = {
