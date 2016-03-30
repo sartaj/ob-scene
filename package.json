@@ -1,6 +1,6 @@
 {
   "name": "ob-scene",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A reactive animation engine. Create interactive infographics with parallax, autoplay, and slide capabilities.",
   "keywords": [
     "animation",
