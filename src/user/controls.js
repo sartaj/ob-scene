@@ -1,8 +1,15 @@
 const Kefir = require('kefir')
 
 const obscene = require('../ob-scene.js')
+const readyToParse$ = obscene.readyToParse$
 
-module.exports.init = function() {
+module.exports.init = () => {
+  readyToParse$.onValue(() => {
+      initControls()
+  })
+}
+
+function initControls() {
 
   var PLAY_SPEED = 10;
 
@@ -60,4 +67,4 @@ module.exports.init = function() {
     isPlaying = false;
     $("#togglePlay").removeClass('fa-pause').addClass('fa-play');
   }
-};
+}

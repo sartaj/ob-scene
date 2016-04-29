@@ -8,38 +8,75 @@
 /*
  *  Globals
 */
-  import { ANIMATION_TIME, $window, $body, INIT_STATE } from './constants.js'
+
+  import { ANIMATION_TIME, $window, INIT_STATE } from './constants.js'
 
 /*
  *  Initialize
 */
 
-  const stateInitialized$ = Kefir.pool()
-
   const initState = Kefir.stream(emitter => {
     emitter.emit(INIT_STATE)
   })
 
-  module.exports.init = (retreivedKeyFrames) => {
-    const keyFramesRetreived$ = Kefir.stream(emitter => {
-      emitter.emit(retreivedKeyFrames)
+  import Pace from 'pace'
+  const readyToParse$ = Kefir.pool()
+
+  module.exports.init = (config, coreUIAdded$) => {
+    // const sceneHtmlString = config.sceneHtmlString
+    // const sceneConfig = config.sceneConfig
+
+    // Pace requires a .start to show the loading screen
+    const loadingComplete$ = Kefir.fromEvents(Pace, 'done')
+    Pace.start()
+
+    const initLoadingComplete$ = Kefir.zip([loadingComplete$, coreUIAdded$])
+      .filter(checkReadyState)
+
+    const initReady$ = initLoadingComplete$
+      .filter(() => !(isTouchDevice()))
+      .map(() => config)
+
+    readyToParse$.plug(initReady$)
+  }
+
+  const touchDeviceDetected$ = readyToParse$
+    .filter(isTouchDevice)
+
+  function checkReadyState() {
+    return (document.readyState === 'complete' // most browsers
+         || document.readyState === 'loaded' // older safari
+         || document.readyState === 'interactive' // at least inital doc loaded
+         )
+  }
+
+  function isTouchDevice() {
+    return 'ontouchstart' in window // works on most browsers
+      || 'onmsgesturechange' in window // works on ie10
+  }
+
+  const keyFramesRetreived$ = readyToParse$
+    .flatMap((config) => Kefir.stream(emitter => {
+      emitter.emit(config.sceneConfig)
+    })
+  )
+
+  const stateInitialized$ = keyFramesRetreived$
+    .flatMap(keyframes => initState.map(state => {
+      const s = state
+      s.keyframes = keyframes
+      return s
+    }))
+    .map(state => {
+      const s = state
+      s.currentWrapper = s.wrappers[0]
+      s.scrollTop = 0
+      return s
     })
 
-    const keyFramesMappedToState$ = keyFramesRetreived$
-      .flatMap(keyframes => initState.map(state => {
-        const s = state
-        s.keyframes = keyframes
-        return s
-      }))
-      .map(state => {
-        const s = state
-        s.currentWrapper = s.wrappers[0]
-        s.scrollTop = 0
-        return s
-      })
+  module.exports.readyToParse$ = readyToParse$
 
-    stateInitialized$.plug(keyFramesMappedToState$)
-  }
+  module.exports.touchDeviceDetected$ = touchDeviceDetected$
 
 /*
  *  Build Page
@@ -202,6 +239,7 @@
       windowWidth: 0,
     })
 
+  module.exports.calculatedCurrentState$ = calculatedCurrentState$
   module.exports.scrollTopChanged$ = scrollTopChanged$
   // scrollTopChanged$.log()
 
@@ -259,23 +297,5 @@
   }
 
   const focusChanged$ = Kefir.merge([actionFocusPrevious, actionFocusNext])
-    .onValue(renderScroll)
 
-  // TODO: Remove log
-  focusChanged$.log()
-
-  // TODO: Abstract Render to renderer
-  function renderScroll(scroll) {
-    // console.log("RENDER", scroll, Math.floor($window.scrollTop()))
-    $body.animate({
-      scrollTop: scroll,
-    }, 1500, 'linear')
-  }
-
-/*
- *  Helpers
-*/
-
-  // function throwError() {
-  //   $body.addClass('page-error')
-  // }
+  module.exports.focusChanged$ = focusChanged$

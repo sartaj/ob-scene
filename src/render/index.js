@@ -2,9 +2,26 @@
  *  Dependencies
 */
 
-  import { scrollTopChanged$, dimensionsCalculated$, wrapperChanged$ } from '../ob-scene.js'
+  import {
+          scrollTopChanged$,
+          focusChanged$,
+          dimensionsCalculated$,
+          calculatedCurrentState$,
+          wrapperChanged$,
+          readyToParse$,
+          touchDeviceDetected$,
+          } from '../ob-scene.js'
+
   import * as pageUtils from '../utils/page-utils.js'
   import { $window, $body } from '../constants.js'
+
+  import Kefir from 'kefir'
+
+  import mainLoop from 'main-loop'
+  import h from 'virtual-dom/h'
+
+  // import audioplayer from './render/audioplayer.js'
+  // audioplayer.config(sceneAudioConfig)
 
 /*
  *  Child Renders
@@ -50,7 +67,7 @@
       $(currentWrapper[1]).show()
 
       window.location.hash = currentWrapper[1]
-      ga('send', 'scene_accessed', currentWrapper[1]) // Google Analytics
+      // ga('send', 'scene_accessed', currentWrapper[1]) // Google Analytics
       renderVideo(currentWrapper)
       renderAudio(currentWrapper)
     })
@@ -103,6 +120,15 @@
     })
 
   })
+
+  focusChanged$.onValue(renderScroll)
+
+    function renderScroll(scroll) {
+      // console.log('RENDER', scroll, Math.floor($window.scrollTop()))
+      $body.animate({
+        scrollTop: scroll,
+      }, 1500, 'linear')
+    }
 
     function renderMusic(wrapperId) {
       audioplayer.next(wrapperId.substr(1))
@@ -165,3 +191,103 @@
         //sinusoadial in and out
         return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b
       }
+
+      /*
+       *  Helpers
+      */
+
+        // function throwError() {
+        //   $body.addClass('page-error')
+        // }
+
+        function renderable(state) {
+          return h('div', { style: { position: 'fixed' } }, [
+            h('div', [
+              h('span', 'Hello World'),
+              h('span', state.currentWrapper),
+              h('span', state.scrollTop.toString() ? state.scrollTop.toString() : null),
+            ]),
+          ])
+        }
+
+
+  app(document.querySelector('body'), calculatedCurrentState$, renderable)
+
+  function app(elem, observable, render) {
+    let loop
+    return observable.onValue((value) => {
+      // console.log(nextVal)
+      if (loop) {
+        loop.update(value)
+      } else {
+        loop = mainLoop(value, render, {
+          diff: require('virtual-dom/diff'),
+          create: require('virtual-dom/create-element'),
+          patch: require('virtual-dom/patch'),
+        })
+        elem.appendChild(loop.target)
+      }
+    })
+  }
+
+  module.exports.app = app
+
+
+  import MAIN_UI_TEMPLATE from './template.js'
+
+  // Add the core template, inluding ui elements,
+  // from `./template.js` to the body
+  // @returns stream when template is added
+  function addCoreUI() {
+    const DOM_ID_TO_LOOK_FOR = 'experience-progress'
+    const OBSCENE_WRAPPER_ID = 'ob-scene-wrapper'
+
+    // Add UI html
+    const $mainUI = document.createElement('div')
+    $mainUI.setAttribute('id', OBSCENE_WRAPPER_ID)
+    $mainUI.innerHTML = MAIN_UI_TEMPLATE
+    document.querySelector('body').appendChild($mainUI)
+
+    return Kefir.stream((emitter) => {
+      // source: http://stackoverflow.com/a/35211286
+
+      // set up the mutation observer
+      const observer = new MutationObserver((mutations, self) => {
+        // `mutations` is an array of mutations that occurred
+        // `self` is the MutationObserver instance
+        const obsceneWrapper = document.getElementById(DOM_ID_TO_LOOK_FOR)
+        if (obsceneWrapper) {
+          emitter.emit(obsceneWrapper)
+          emitter.end()
+        }
+        return () => {
+          self.disconnect() // stop observing
+        }
+      })
+
+      // start observing
+      observer.observe(document, {
+        childList: true,
+        subtree: true,
+      })
+    })
+  }
+
+  module.exports.init = () => {
+    const coreUIAdded$ = addCoreUI()
+    return coreUIAdded$
+  }
+
+  readyToParse$.onValue((config) => {
+    $('.container-inner').html(config.sceneHtmlString)
+    $('.loading').delay(300).fadeOut()
+    // audioplayer.next('intro');
+    // audioplayer.play();
+  })
+
+  touchDeviceDetected$
+    .onValue(() => {
+      $('#unsupported').show()
+      $('.container').hide()
+      $('.loading').hide()
+    })

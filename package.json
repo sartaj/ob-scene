@@ -27,9 +27,13 @@
     "obscene": "./compiler/cli.js"
   },
   "dependencies": {
+    "@cycle/core": "^6.0.3",
     "howler": "^1.1.29",
     "kefir": "^3.2.0",
-    "pace": "HubSpot/pace"
+    "main-loop": "^3.2.0",
+    "pace": "HubSpot/pace",
+    "rx": "^4.1.0",
+    "virtual-dom": "^2.1.1"
   },
   "devDependencies": {
     "babel-loader": "^6.2.2",

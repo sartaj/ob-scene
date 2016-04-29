@@ -5,13 +5,14 @@
 //  Imports
 
 const fs = require('fs')
-const path = require('path')
-const args = process.argv.slice(2)
+// const path = require('path')
+// const args = process.argv.slice(2)
 
 const watch = require('watch')
-var colors = require('colors/safe')
+const colors = require('colors/safe')
 const colorsConfig = {
   info: 'cyan',
+  success: 'green',
   data: 'grey',
   debug: 'blue',
   error: 'red',
@@ -21,39 +22,47 @@ colors.setTheme(colorsConfig)
 
 const sceneCompiler = require('./scene-compiler.js')
 
-const processedPath = process.cwd() + '/scenes/'
+const processedPath = `${process.cwd()}/scenes/`
 
 //  Compile
 
 function compile() {
-  console.time(colors.info('compiling...'))
+  console.log(colors.data('compiling...'))
+  console.time(colors.info('compiled...'))
   const compiled = sceneCompiler.compile(processedPath)
-  fs.writeFileSync('./scenes-compiled.js', `var obscene_compiled = ${JSON.stringify(compiled)}`)
-  console.timeEnd(colors.info('compiling...'))
+  const jsCompiled = `var obscene_compiled = ${JSON.stringify(compiled)}`
+  fs.writeFileSync('./scenes-compiled.js', jsCompiled)
+  console.timeEnd(colors.info('compiled...'));
 }
 
 const watchOpts = {
   ignoreDotFiles: true,
 }
 
-watch.createMonitor(processedPath, watchOpts, (monitor) => {
-  monitor.on('created', (f) => {
-    console.log(colors.data(`created ${f}`))
-      // Handle new files
-    compile()
-  })
-  monitor.on('changed', (f) => {
-    console.log(colors.data(`changed: ${f}`))
-      // Handle file changes
-    compile()
-  })
-  monitor.on('removed', (f) => {
-    console.log(colors.data(`removed: ${f}`))
-      // Handle removed files
-    compile()
-  })
-})
-
 //  Init
 
-compile()
+function init() {
+  console.log(colors.success(`compiling ${processedPath} \nto ${process.cwd()}/scenes-compiled.js`))
+
+  watch.createMonitor(processedPath, watchOpts, (monitor) => {
+    monitor.on('created', (f) => {
+      console.log(colors.data(`created ${f}`))
+        // Handle new files
+      compile()
+    })
+    monitor.on('changed', (f) => {
+      console.log(colors.data(`changed: ${f}`))
+        // Handle file changes
+      compile()
+    })
+    monitor.on('removed', (f) => {
+      console.log(colors.data(`removed: ${f}`))
+        // Handle removed files
+      compile()
+    })
+  })
+
+  compile()
+}
+
+init()
